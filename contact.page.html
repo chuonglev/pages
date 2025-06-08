@@ -266,19 +266,44 @@
       'use strict';
       var forms = document.querySelectorAll('.needs-validation');
       Array.prototype.slice.call(forms).forEach(function (form) {
-        form.addEventListener('submit', function (event) {
+        form.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+
           if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-          } else {
-            event.preventDefault(); // Prevent form submission for demo
-            const banner = document.getElementById('successBanner');
-            banner.classList.add('show');
-            setTimeout(() => {
-              banner.classList.remove('show');
-            }, 3000); // Hide banner after 3 seconds
-            form.reset();
-            form.classList.remove('was-validated');
+            form.classList.add('was-validated');
+            return;
+          }
+
+          const contact = {
+            name: form.name.value.trim(),
+            email: form.email.value.trim(),
+            message: form.message.value.trim(),
+          };
+
+          const formMsg = document.getElementById('formMsg');
+
+          try {
+            const res = await fetch('http://localhost:3000/api/contact', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(contact)
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+              formMsg.innerHTML = '<p class="form-message-success">' + (data.message) + '</p>';
+              form.reset();
+              form.classList.remove('was-validated');
+            } else {
+              formMsg.innerHTML = '<p class="form-message-error">' + (data.error || 'Không xác định') + '</p>';
+            }
+          } catch (err) {
+            formMsg.innerHTML = '<p class="form-message-error">Lỗi kết nối đến server</p>';
+            console.error(err);
           }
           form.classList.add('was-validated');
         }, false);

@@ -1,0 +1,9 @@
+Dự án nodejs
+Cách chạy file:
+B1: mở cmd folder chứa code (FSinTL)
+B2: Chạy lần lượt các mã sau 
+
+npm init -y
+npm install express
+npm start
+
